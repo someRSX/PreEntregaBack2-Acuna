@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Productos en Tiempo Real </title>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+
+        const socket = io();
+
+        socket.on('new-product', (product) => {
+            const productList = document.getElementById('productList');
+            const li = document.createElement('li');
+            li.innerHTML = `${product.name} - $${product.price} <form action="/delete-product/${product.id}" method="POST"><button type="submit"> Eliminar </button></form>`;
+            productList.appendChild(li);
+        });
+
+        socket.on('delete-product', (productId) => {
+            const productList = document.getElementById('productList');
+            const productItems = productList.getElementsByTagName('li');
+            for (let item of productItems) {
+                if (item.innerHTML.includes(productId)) {
+                    productList.removeChild(item);
+                    break;
+                }
+            }
+        });
+
+        socket.on('all-products', (products) => {
+            const productList = document.getElementById('productList');
+            products.forEach(product => {
+                const li = document.createElement('li');
+                li.innerHTML = `${product.name} - $${product.price} <form action="/delete-product/${product.id}" method="POST"><button type="submit"> Eliminar </button></form>`;
+                productList.appendChild(li);
+            });
+        });
+    </script>
+
+</head>
+<body>
+    <h1> Productos en Tiempo Real </h1>
+
+    <form action="/add-product" method="POST">
+        <label for="name"> Nombre del Producto: </label>
+        <input type="text" name="name" id="name" required>
+        <label for="price"> Precio: </label>
+        <input type="number" name="price" id="price" required>
+        <button type="submit"> Agregar Producto </button>
+    </form>
+
+    <ul id="productList">
+    </ul>
+
+    <a href="/"> Volver a la página principal </a>
+    
+</body>
+</html>
